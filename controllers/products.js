@@ -272,6 +272,10 @@ const createProduct = asyncHandler(async (request, response) => {
     manufacturer,
     categoryId,
     inStock,
+    color,
+    model,
+    mileage,
+    year,
   } = request.body;
 
   if (!title) {
@@ -287,7 +291,7 @@ const createProduct = asyncHandler(async (request, response) => {
     throw new AppError("Missing required field: slug", 400);
   }
 
-  if (!price) {
+  if (price === undefined || price === null || price === "") {
     throw new AppError("Missing required field: price", 400);
   }
 
@@ -308,6 +312,10 @@ const createProduct = asyncHandler(async (request, response) => {
       manufacturer,
       categoryId,
       inStock,
+      color: color || null,
+      model: model || null,
+      mileage: mileage === undefined || mileage === "" ? null : Number(mileage),
+      year: year === undefined || year === "" ? null : Number(year),
     },
   });
   return response.status(201).json(product);
@@ -328,6 +336,10 @@ const updateProduct = asyncHandler(async (request, response) => {
     manufacturer,
     categoryId,
     inStock,
+    color,
+    model,
+    mileage,
+    year,
   } = request.body;
 
   // Basic validation
@@ -363,6 +375,10 @@ const updateProduct = asyncHandler(async (request, response) => {
       manufacturer: manufacturer,
       categoryId: categoryId,
       inStock: inStock,
+      color: color || null,
+      model: model || null,
+      mileage: mileage === undefined || mileage === "" ? null : Number(mileage),
+      year: year === undefined || year === "" ? null : Number(year),
     },
   });
 

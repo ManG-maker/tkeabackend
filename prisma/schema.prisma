@@ -24,6 +24,10 @@ model Product {
   manufacturer   String
   inStock        Int                      @default(1)
   mainImagePublicId String?
+  color          String?
+  model          String?
+  mileage        Int?
+  year           Int?
   categoryId     String
   category       Category                 @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   customerOrders customer_order_product[]
