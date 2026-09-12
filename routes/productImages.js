@@ -5,8 +5,12 @@ const {
   createImage,
   updateImage,
   deleteImage
+  , updateSingleImage
+  , deleteSingleImage
 } = require('../controllers/productImages')
 
+
+router.route('/item/:imageID').patch(updateSingleImage).delete(deleteSingleImage);
 
 router.route('/:id').get(getSingleProductImages); 
 

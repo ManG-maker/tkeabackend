@@ -44,6 +44,7 @@ model Image {
   productID String
   image     String
   publicId  String?
+  sortOrder Int    @default(0)
 }
 
 model User {

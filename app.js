@@ -68,6 +68,10 @@ const allowedOrigins = [
   'http://127.0.0.1:3001',
   'http://192.168.219.111:3000',
   'http://192.168.219.111:3001',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'https://tkea237.com',
+  'https://www.tkea237.com',
   process.env.NEXTAUTH_URL,
   process.env.FRONTEND_URL,
 ].filter(Boolean); // Remove undefined values

@@ -1,4 +1,4 @@
-const { uploadBuffer } = require("../utills/cloudinary");
+const { uploadBuffer, deleteAsset } = require("../utills/cloudinary");
 
 async function uploadMainImage(req, res) {
     if (!req.files || Object.keys(req.files).length === 0) {
@@ -28,6 +28,20 @@ async function uploadMainImage(req, res) {
     }
   }
 
+async function deleteMainImage(req, res) {
+  const { publicId } = req.body || {};
+  if (!publicId) return res.status(400).json({ message: "publicId is required" });
+
+  try {
+    await deleteAsset(publicId);
+    return res.status(204).send();
+  } catch (error) {
+    console.error("Cloudinary delete failed:", error);
+    return res.status(502).json({ message: "Image delete failed" });
+  }
+}
+
   module.exports = {
-    uploadMainImage
+    uploadMainImage,
+    deleteMainImage,
 };
