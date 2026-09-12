@@ -1,5 +1,6 @@
 const prisma = require("../utills/db"); // ✅ Use shared connection with SSL
 const { asyncHandler, handleServerError, AppError } = require("../utills/errorHandler");
+const { deleteAsset } = require("../utills/cloudinary");
 
 // Security: Define whitelists for allowed filter types and operators
 const ALLOWED_FILTER_TYPES = ['price', 'rating', 'category', 'inStock', 'outOfStock'];
@@ -265,6 +266,7 @@ const createProduct = asyncHandler(async (request, response) => {
     slug,
     title,
     mainImage,
+    mainImagePublicId,
     price,
     description,
     manufacturer,
@@ -299,6 +301,7 @@ const createProduct = asyncHandler(async (request, response) => {
       slug,
       title,
       mainImage,
+      mainImagePublicId: mainImagePublicId || null,
       price,
       rating: 5,
       description,
@@ -318,6 +321,7 @@ const updateProduct = asyncHandler(async (request, response) => {
     slug,
     title,
     mainImage,
+    mainImagePublicId,
     price,
     rating,
     description,
@@ -351,6 +355,7 @@ const updateProduct = asyncHandler(async (request, response) => {
       merchantId: merchantId,
       title: title,
       mainImage: mainImage,
+      mainImagePublicId: mainImagePublicId || null,
       slug: slug,
       price: price,
       rating: rating,
@@ -382,6 +387,16 @@ const deleteProduct = asyncHandler(async (request, response) => {
   if(relatedOrderProductItems.length > 0){
     throw new AppError("Cannot delete product because of foreign key constraint", 400);
   }
+
+  const productImages = await prisma.image.findMany({
+    where: { productID: id },
+    select: { publicId: true },
+  });
+
+  await Promise.all([
+    deleteAsset(existingProduct.mainImagePublicId),
+    ...productImages.map((image) => deleteAsset(image.publicId)),
+  ]);
 
   await prisma.product.delete({
     where: {

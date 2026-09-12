@@ -1,22 +1,31 @@
-const { PrismaClient } = require("@prisma/client");
-const prisma = require("../utills/db"); // ✅ Use shared connection
+const { uploadBuffer } = require("../utills/cloudinary");
 
 async function uploadMainImage(req, res) {
     if (!req.files || Object.keys(req.files).length === 0) {
       return res.status(400).json({ message: "Nema otpremljenih fajlova" });
     }
-  
-    // Get file from a request
+
     const uploadedFile = req.files.uploadedFile;
-  
-    // Using mv method for moving file to the directory on the server
-    uploadedFile.mv('../public/' + uploadedFile.name, (err) => {
-      if (err) {
-        return res.status(500).send(err);
-      }
-  
-      res.status(200).json({ message: "Fajl je uspešno otpremljen" });
-    });
+
+    if (!uploadedFile.mimetype?.startsWith("image/")) {
+      return res.status(400).json({ message: "Only image files are allowed" });
+    }
+
+    if (uploadedFile.size > 5 * 1024 * 1024) {
+      return res.status(413).json({ message: "Image must be 5 MB or smaller" });
+    }
+
+    try {
+      const result = await uploadBuffer(uploadedFile.data);
+      return res.status(201).json({
+        message: "Fajl je uspešno otpremljen",
+        url: result.secure_url,
+        publicId: result.public_id,
+      });
+    } catch (error) {
+      console.error("Cloudinary upload failed:", error);
+      return res.status(502).json({ message: "Image upload failed" });
+    }
   }
 
   module.exports = {

@@ -1,5 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+const { deleteAsset } = require("../utills/cloudinary");
 
 async function getSingleProductImages(request, response) {
   const { id } = request.params;
@@ -14,11 +15,12 @@ async function getSingleProductImages(request, response) {
 
 async function createImage(request, response) {
   try {
-    const { productID, image } = request.body;
+    const { productID, image, publicId } = request.body;
     const createImage = await prisma.image.create({
       data: {
         productID,
         image,
+        publicId: publicId || null,
       },
     });
     return response.status(201).json(createImage);
@@ -31,7 +33,7 @@ async function createImage(request, response) {
 async function updateImage(request, response) {
   try {
     const { id } = request.params; // Getting product id from params
-    const { productID, image } = request.body;
+    const { productID, image, publicId } = request.body;
 
     // Checking whether photo exists for the given product id
     const existingImage = await prisma.image.findFirst({
@@ -55,6 +57,7 @@ async function updateImage(request, response) {
       data: {
         productID: productID,
         image: image,
+        publicId: publicId || null,
       },
     });
 
@@ -68,10 +71,15 @@ async function updateImage(request, response) {
 async function deleteImage(request, response) {
   try {
     const { id } = request.params;
-    await prisma.image.deleteMany({
+    const images = await prisma.image.findMany({
       where: {
         productID: String(id), // Converting id to string
       },
+    });
+
+    await Promise.all(images.map((image) => deleteAsset(image.publicId)));
+    await prisma.image.deleteMany({
+      where: { productID: String(id) },
     });
     return response.status(204).send();
   } catch (error) {

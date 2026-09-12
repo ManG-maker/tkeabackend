@@ -23,6 +23,7 @@ model Product {
   description    String
   manufacturer   String
   inStock        Int                      @default(1)
+  mainImagePublicId String?
   categoryId     String
   category       Category                 @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   customerOrders customer_order_product[]
@@ -38,6 +39,7 @@ model Image {
   imageID   String @id @default(uuid())
   productID String
   image     String
+  publicId  String?
 }
 
 model User {
